@@ -1,13 +1,7 @@
 from web3 import Web3
 from utilis import checkToken
-import signal, sys, json, logging
+import json, logging
 
-def signal_handler(sig, frame):
-    with open("whitelist.json", "w") as wfp:
-        json.dump(list(whitelist), wfp)
-    sys.exit(0)
-
-signal.signal(signal.SIGINT, signal_handler)
 
 # Configuring logging
 logging.getLogger().setLevel(logging.WARNING)
@@ -46,15 +40,22 @@ for i in range(fromPair, allPair):
     _checkToken0 = checkToken(token0)
     _checkToken1 = checkToken(token1)
 
-    if token0 not in whitelist and _checkToken0:
-        whitelist.add(token0)
-    if token1 not in whitelist and _checkToken1:
-        whitelist.add(token1)
+    if token0 not in whitelist:
+        _checkToken0 = checkToken(token0)
+        if _checkToken0:
+            whitelist.add(token0)
+    if token1 not in whitelist:
+        _checkToken1 = checkToken(token1)
+        if _checkToken1:
+            whitelist.add(token1)
 
     if not(_checkToken0) and not(_checkToken1):
         continue
     
     with open('lastpair', 'w') as wfp:
         wfp.write(str(i))
+    
+    with open("whitelist.json", "w") as wfp:
+        json.dump(list(whitelist), wfp)
 
 
